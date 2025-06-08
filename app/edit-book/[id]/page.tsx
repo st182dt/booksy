@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Upload, ArrowLeft, BookOpen, X } from "lucide-react"
+import { Upload, ArrowLeft, BookOpen, X, CheckCircle, AlertCircle } from "lucide-react"
 import type { Book } from "@/lib/types"
 import Image from "next/image"
 
@@ -34,6 +34,7 @@ export default function EditBookPage({ params }: { params: Promise<{ id: string 
   const [animatingImages, setAnimatingImages] = useState<Set<string>>(new Set())
   const [hoveredImageId, setHoveredImageId] = useState<string | null>(null)
   const [isPageLoading, setIsPageLoading] = useState(true)
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -57,7 +58,7 @@ export default function EditBookPage({ params }: { params: Promise<{ id: string 
         // Convert existing images to ImageFile format
         const existingImages = Array.isArray(bookData.imageUrl) ? bookData.imageUrl : [bookData.imageUrl]
         const imageFileData: ImageFile[] = existingImages
-          .filter((url) => url && url.trim() !== "") // Filter out empty URLs
+          .filter((url: string) => url && url.trim() !== "") // Filter out empty URLs with explicit type
           .map((url: string, index: number) => ({
             preview: url,
             id: `existing-${index}`,
@@ -183,6 +184,7 @@ export default function EditBookPage({ params }: { params: Promise<{ id: string 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsLoading(true)
+    setMessage(null)
 
     try {
       const formData = new FormData(e.currentTarget)
@@ -229,10 +231,25 @@ export default function EditBookPage({ params }: { params: Promise<{ id: string 
           body: JSON.stringify({ lastUsedSellerProfile: sellerProfile }),
         })
 
-        router.push("/my-listings")
+        setMessage({
+          type: "success",
+          text: "Book updated successfully! Redirecting to your listings...",
+        })
+
+        setTimeout(() => {
+          router.push("/my-listings")
+        }, 2000)
+      } else {
+        const errorData = await response.json()
+        throw new Error(errorData.message || "Failed to update book")
       }
     } catch (error) {
       console.error("Error updating book:", error)
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred"
+      setMessage({
+        type: "error",
+        text: errorMessage,
+      })
     } finally {
       setIsLoading(false)
     }
@@ -267,6 +284,29 @@ export default function EditBookPage({ params }: { params: Promise<{ id: string 
         transition={{ delay: 0.1 }}
         className="bg-white/90 backdrop-blur-md rounded-2xl p-8 shadow-lg border border-gray-200"
       >
+        {/* Message Display */}
+        <AnimatePresence>
+          {message && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className={`mb-6 p-4 rounded-lg border flex items-center gap-3 ${
+                message.type === "success"
+                  ? "bg-green-50 border-green-200 text-green-800"
+                  : "bg-red-50 border-red-200 text-red-800"
+              }`}
+            >
+              {message.type === "success" ? (
+                <CheckCircle className="h-5 w-5 flex-shrink-0" />
+              ) : (
+                <AlertCircle className="h-5 w-5 flex-shrink-0" />
+              )}
+              <p className="text-sm font-medium">{message.text}</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <Label htmlFor="title" className="text-gray-700 font-medium">

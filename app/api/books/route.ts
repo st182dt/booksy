@@ -38,7 +38,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(sanitizedBooks)
   } catch (error) {
     console.error("Error fetching books:", error)
-    return NextResponse.json({ message: "Internal server error" }, { status: 500 })
+    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred"
+    return NextResponse.json({ message: `Internal server error: ${errorMessage}` }, { status: 500 })
   }
 }
 
@@ -143,6 +144,7 @@ export async function POST(request: NextRequest) {
     )
   } catch (error) {
     console.error("Error adding book:", error)
-    return NextResponse.json({ message: `Internal server error: ${error.message}` }, { status: 500 })
+    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred"
+    return NextResponse.json({ message: `Internal server error: ${errorMessage}` }, { status: 500 })
   }
 }

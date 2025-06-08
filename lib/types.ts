@@ -1,3 +1,5 @@
+import type { JWTPayload } from "jose"
+
 export interface Book {
   _id?: string
   title: string
@@ -22,7 +24,7 @@ export interface User {
   admin?: boolean
 }
 
-export interface Session {
+export interface Session extends JWTPayload {
   userId: string
   email: string
   name: string
