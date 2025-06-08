@@ -2,26 +2,262 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 262.1 83.3% 57.8%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 262.1 83.3% 57.8%;
+    --radius: 0.5rem;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+/* Add extra small breakpoint for very small devices */
+@screen xs {
+  /* 475px and up */
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.glass-effect {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
   }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Custom Navigation Styles - Responsive */
+.nav-link {
+  @apply text-gray-700 font-semibold px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-lg transition-all duration-200 ease-out;
+  @apply hover:text-purple-600 hover:bg-purple-50;
+  transform: scale(1);
+}
+
+.nav-link:hover {
+  transform: scale(1.05);
+}
+
+.nav-link:active {
+  transform: scale(0.95);
+}
+
+.nav-button {
+  @apply inline-flex items-center justify-center px-3 sm:px-4 md:px-6 py-1.5 sm:py-2 rounded-lg font-semibold transition-all duration-200 ease-out;
+  @apply bg-gradient-to-r from-blue-500 to-purple-600 text-white;
+  @apply hover:from-blue-600 hover:to-purple-700;
+  transform: scale(1);
+}
+
+.nav-button:hover {
+  transform: scale(1.05);
+}
+
+.nav-button:active {
+  transform: scale(0.95);
+}
+
+.nav-button-outline {
+  @apply inline-flex items-center justify-center px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-lg font-semibold transition-all duration-200 ease-out;
+  @apply border-2 border-gray-300 text-gray-700 bg-white;
+  @apply hover:border-purple-300 hover:bg-purple-50 hover:text-purple-700;
+  transform: scale(1);
+}
+
+.nav-button-outline:hover {
+  transform: scale(1.05);
+}
+
+.nav-button-outline:active {
+  transform: scale(0.95);
+}
+
+/* Responsive text utilities */
+.text-responsive-xs {
+  @apply text-xs sm:text-sm md:text-base;
+}
+
+.text-responsive-sm {
+  @apply text-sm sm:text-base md:text-lg;
+}
+
+.text-responsive-base {
+  @apply text-base sm:text-lg md:text-xl;
+}
+
+.text-responsive-lg {
+  @apply text-lg sm:text-xl md:text-2xl;
+}
+
+.text-responsive-xl {
+  @apply text-xl sm:text-2xl md:text-3xl;
+}
+
+/* Responsive spacing utilities */
+.space-responsive-sm > * + * {
+  @apply mt-2 sm:mt-3 md:mt-4;
+}
+
+.space-responsive-md > * + * {
+  @apply mt-3 sm:mt-4 md:mt-6;
+}
+
+.space-responsive-lg > * + * {
+  @apply mt-4 sm:mt-6 md:mt-8;
+}
+
+/* Responsive padding utilities */
+.p-responsive-sm {
+  @apply p-2 sm:p-3 md:p-4;
+}
+
+.p-responsive-md {
+  @apply p-3 sm:p-4 md:p-6;
+}
+
+.p-responsive-lg {
+  @apply p-4 sm:p-6 md:p-8;
+}
+
+/* Responsive margin utilities */
+.m-responsive-sm {
+  @apply m-2 sm:m-3 md:m-4;
+}
+
+.m-responsive-md {
+  @apply m-3 sm:m-4 md:m-6;
+}
+
+.m-responsive-lg {
+  @apply m-4 sm:m-6 md:m-8;
+}
+
+/* Responsive grid utilities */
+.grid-responsive-books {
+  @apply grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5;
+}
+
+/* Responsive height utilities */
+.h-responsive-sm {
+  @apply h-6 sm:h-7 md:h-8;
+}
+
+.h-responsive-md {
+  @apply h-8 sm:h-9 md:h-10;
+}
+
+.h-responsive-lg {
+  @apply h-10 sm:h-12 md:h-14;
+}
+
+/* Responsive width utilities */
+.w-responsive-sm {
+  @apply w-6 sm:w-7 md:w-8;
+}
+
+.w-responsive-md {
+  @apply w-8 sm:w-9 md:w-10;
+}
+
+.w-responsive-lg {
+  @apply w-10 sm:w-12 md:w-14;
+}
+
+/* Line clamp utilities for better text truncation */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+/* Responsive container utilities */
+.container-responsive {
+  @apply container mx-auto px-2 sm:px-4 lg:px-6 xl:px-8;
+}
+
+/* Touch-friendly button sizes for mobile */
+@media (max-width: 640px) {
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Improved focus states for accessibility */
+.focus-visible:focus-visible {
+  @apply outline-2 outline-offset-2 outline-purple-500;
+}
+
+/* Responsive modal sizing */
+.modal-responsive {
+  @apply w-full max-w-xs sm:max-w-sm md:max-w-2xl lg:max-w-4xl xl:max-w-5xl;
+}
+
+/* Responsive image aspect ratios */
+.aspect-responsive-card {
+  @apply aspect-[3/4] sm:aspect-[4/5] md:aspect-[3/4];
+}
+
+.aspect-responsive-modal {
+  @apply aspect-[4/3] sm:aspect-[16/10] md:aspect-[4/3];
 }

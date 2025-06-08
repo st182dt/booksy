@@ -1,36 +1,138 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BookMarket - Used School Books Marketplace
 
-## Getting Started
+A modern, responsive marketplace for buying and selling used school books built with Next.js 14, MongoDB, and Imgur API integration.
 
-First, run the development server:
+## 🚀 Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Modern Design**: Beautiful blue/purple gradient theme with glass morphism effects
+- **Responsive Layout**: Works perfectly on desktop, tablet, and mobile
+- **User Authentication**: Secure login/register system
+- **Book Management**: Add, edit, delete, and browse books
+- **Image Upload**: Integrated with Imgur API for photo hosting
+- **Search & Filter**: Find books by title, condition, price, and date
+- **Social Integration**: Direct links to seller's social media profiles
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛠 Local Setup Instructions
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Prerequisites
+- Node.js 18+ installed
+- MongoDB Atlas account (connection string provided)
+- Imgur API credentials (provided)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Installation Steps
 
-## Learn More
+1. **Clone/Download the project files**
 
-To learn more about Next.js, take a look at the following resources:
+2. **Install dependencies**
+   \`\`\`bash
+   npm install
+   \`\`\`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3. **Environment Setup**
+   The app is pre-configured with your credentials:
+   - MongoDB URI: Already set in the code
+   - Imgur API: Already configured with your client ID
+   - JWT Secret: Already set in the code
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+4. **Run the development server**
+   \`\`\`bash
+   npm run dev
+   \`\`\`
 
-## Deploy on Vercel
+5. **Open your browser**
+   Navigate to [http://localhost:3000](http://localhost:3000)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📱 How to Use
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### For All Users (No Login Required)
+- Browse all available books on the homepage
+- Search books by title
+- Filter by condition (New, Like New, Good, Fair, Poor)
+- Sort by date, title, condition, or price
+- View detailed book information
+- Contact sellers via their social media profiles
+
+### For Registered Users
+- **Register/Login**: Click the Login button in the top right
+- **Add Books**: Use the "Add Book" button to list your textbooks
+- **Manage Listings**: View and edit your books in "My Listings"
+- **Upload Photos**: Drag and drop or click to upload book images
+- **Edit/Delete**: Manage your own listings with full control
+
+## 🎯 Key Features Explained
+
+### Book Listing Process
+1. Click "Add Book" (requires login)
+2. Fill in book details (title, condition, price, description)
+3. Upload a photo of the book
+4. Add your social media profile link
+5. Submit to marketplace
+
+### Search & Discovery
+- **Search Bar**: Find books by title
+- **Condition Filter**: Filter by book condition
+- **Sort Options**: Order by date, alphabetical, condition, or price
+- **Real-time Results**: Instant filtering and searching
+
+### User Experience
+- **Glass Morphism Design**: Modern, translucent UI elements
+- **Smooth Animations**: Framer Motion powered transitions
+- **Mobile Responsive**: Perfect experience on all devices
+- **Toast Notifications**: User-friendly feedback messages
+
+## 🔧 Technical Stack
+
+- **Frontend**: Next.js 14 with App Router
+- **Styling**: Tailwind CSS with custom gradients
+- **Animations**: Framer Motion
+- **Database**: MongoDB Atlas
+- **Authentication**: JWT with secure sessions
+- **Image Hosting**: Imgur API
+- **UI Components**: Radix UI primitives
+
+## 📊 Database Collections
+
+The app automatically creates these MongoDB collections:
+- `users`: User accounts and authentication
+- `books`: Book listings with all details
+
+## 🎨 Design System
+
+- **Primary Colors**: Blue to Purple gradients
+- **Background**: Light white with subtle gradients
+- **Effects**: Glass morphism, floating animations
+- **Typography**: Inter font family
+- **Icons**: Lucide React icon set
+
+## 🔒 Security Features
+
+- **Password Hashing**: bcryptjs for secure password storage
+- **JWT Authentication**: Secure session management
+- **Input Validation**: Server-side validation for all forms
+- **CORS Protection**: Built-in Next.js security headers
+- **Image Upload**: Secure Imgur API integration
+
+## 📝 Usage Tips
+
+1. **High-Quality Photos**: Upload clear, well-lit photos of your books
+2. **Detailed Descriptions**: Include edition, condition details, and any highlights
+3. **Fair Pricing**: Research similar books for competitive pricing
+4. **Social Profiles**: Use active Facebook or Instagram profiles for better trust
+5. **Regular Updates**: Keep your listings current and remove sold books
+
+## 🚀 Getting Started
+
+1. Start the development server: `npm run dev`
+2. Visit `http://localhost:3000`
+3. Browse books or create an account to start selling
+4. Add your first book to the marketplace!
+
+## 📞 Support
+
+If you encounter any issues:
+1. Check the browser console for error messages
+2. Ensure MongoDB connection is working
+3. Verify Imgur API credentials
+4. Make sure all dependencies are installed
+
+Enjoy your new book marketplace! 📚✨
