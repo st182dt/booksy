@@ -4,7 +4,16 @@ import { getSession } from "@/lib/auth"
 
 export async function GET(request: NextRequest) {
   try {
+    // Add CORS headers for production
+    const headers = {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    }
+
     const session = await getSession()
+    console.log("Session in GET /api/books:", session ? "Found" : "Not found")
+
     const db = await getDatabase()
     const books = db.collection("books")
 
@@ -21,7 +30,9 @@ export async function GET(request: NextRequest) {
       query = { $or: [{ toVerify: { $ne: true } }, { toVerify: { $exists: false } }] }
     }
 
+    console.log("MongoDB query:", query)
     const allBooks = await books.find(query).sort({ dateAdded: -1 }).skip(skip).limit(limit).toArray()
+    console.log("Found books:", allBooks.length)
 
     // Don't expose sensitive data to non-admins
     const sanitizedBooks = allBooks.map((book) => {
@@ -35,7 +46,7 @@ export async function GET(request: NextRequest) {
       return book
     })
 
-    return NextResponse.json(sanitizedBooks)
+    return NextResponse.json(sanitizedBooks, { headers })
   } catch (error) {
     console.error("Error fetching books:", error)
     const errorMessage = error instanceof Error ? error.message : "Unknown error occurred"
@@ -45,8 +56,13 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    console.log("POST /api/books called")
+
     const session = await getSession()
+    console.log("Session in POST /api/books:", session ? "Found" : "Not found")
+
     if (!session) {
+      console.log("No session found, returning 401")
       return NextResponse.json({ message: "Authentication required" }, { status: 401 })
     }
 
@@ -115,6 +131,7 @@ export async function POST(request: NextRequest) {
     const sanitizedTitle = bookData.title.replace(/[<>]/g, "").trim()
     const sanitizedDescription = bookData.description.replace(/[<>]/g, "").trim()
 
+    console.log("Connecting to database...")
     const db = await getDatabase()
     const books = db.collection("books")
 
@@ -134,6 +151,7 @@ export async function POST(request: NextRequest) {
     console.log("Creating book:", newBook) // Debug log
 
     const result = await books.insertOne(newBook)
+    console.log("Book created with ID:", result.insertedId)
 
     return NextResponse.json(
       {
@@ -147,4 +165,16 @@ export async function POST(request: NextRequest) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error occurred"
     return NextResponse.json({ message: `Internal server error: ${errorMessage}` }, { status: 500 })
   }
+}
+
+// Add OPTIONS handler for CORS
+export async function OPTIONS(request: NextRequest) {
+  return new Response(null, {
+    status: 200,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    },
+  })
 }

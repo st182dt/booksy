@@ -25,8 +25,13 @@ if (process.env.NODE_ENV === "development") {
 }
 
 export async function getDatabase(): Promise<Db> {
-  const client = await clientPromise
-  return client.db("bookmarketplace")
+  try {
+    const client = await clientPromise
+    return client.db("bookmarketplace")
+  } catch (error) {
+    console.error("Failed to connect to MongoDB:", error)
+    throw new Error("Database connection failed")
+  }
 }
 
 export default clientPromise
