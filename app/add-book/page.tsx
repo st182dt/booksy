@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Upload, ArrowLeft, BookOpen, X } from "lucide-react"
+import { Upload, ArrowLeft, BookOpen, X, CheckCircle, AlertCircle } from "lucide-react"
 import Image from "next/image"
 
 interface ImageFile {
@@ -30,6 +30,7 @@ export default function AddBookPage() {
   const [hoveredImageId, setHoveredImageId] = useState<string | null>(null)
   const [isPageLoading, setIsPageLoading] = useState(true)
   const [defaultSellerProfile, setDefaultSellerProfile] = useState("")
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -148,7 +149,8 @@ export default function AddBookPage() {
       })
 
       if (!response.ok) {
-        throw new Error("Failed to upload image")
+        const errorData = await response.json()
+        throw new Error(errorData.message || "Failed to upload image")
       }
 
       const data = await response.json()
@@ -161,41 +163,94 @@ export default function AddBookPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsLoading(true)
+    setMessage(null)
 
     try {
       const formData = new FormData(e.currentTarget)
+      const title = formData.get("title") as string
+      const condition = formData.get("condition") as string
+      const price = formData.get("price") as string
+      const description = formData.get("description") as string
       const sellerProfile = formData.get("sellerProfile") as string
 
-      // Upload images
+      // Client-side validation
+      if (!title?.trim()) {
+        throw new Error("Title is required")
+      }
+      if (!condition) {
+        throw new Error("Condition is required")
+      }
+      if (!price || isNaN(Number(price)) || Number(price) < 0) {
+        throw new Error("Valid price is required")
+      }
+      if (!description?.trim() || description.trim().length < 10) {
+        throw new Error("Description must be at least 10 characters")
+      }
+      if (!sellerProfile?.trim()) {
+        throw new Error("Seller profile URL is required")
+      }
+      if (imageFiles.length === 0) {
+        throw new Error("At least one image is required")
+      }
+
+      // Upload images first
+      console.log("Uploading images...")
       const imageUrls = await uploadImages()
+      console.log("Images uploaded:", imageUrls)
 
       const bookData = {
-        title: formData.get("title") as string,
-        condition: formData.get("condition") as string,
-        price: Number.parseFloat(formData.get("price") as string),
-        description: formData.get("description") as string,
-        sellerProfile: sellerProfile,
+        title: title.trim(),
+        condition: condition,
+        price: Number(price),
+        description: description.trim(),
+        sellerProfile: sellerProfile.trim(),
         imageUrl: imageUrls,
       }
 
+      console.log("Submitting book data:", bookData)
+
       const response = await fetch("/api/books", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(bookData),
       })
 
+      const responseData = await response.json()
+      console.log("Server response:", responseData)
+
       if (response.ok) {
         // Update user's last used seller profile
-        await fetch("/api/auth/update-profile", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ lastUsedSellerProfile: sellerProfile }),
+        try {
+          await fetch("/api/auth/update-profile", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ lastUsedSellerProfile: sellerProfile }),
+          })
+        } catch (profileError) {
+          console.warn("Failed to update profile:", profileError)
+        }
+
+        setMessage({
+          type: "success",
+          text: "Your book has been submitted for verification and will appear in the marketplace once approved by an admin.",
         })
 
-        router.push("/my-listings")
+        // Redirect after showing success message
+        setTimeout(() => {
+          router.push("/my-listings")
+        }, 2000)
+      } else {
+        throw new Error(responseData.message || "Failed to add book")
       }
     } catch (error) {
       console.error("Error adding book:", error)
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred"
+      setMessage({
+        type: "error",
+        text: errorMessage,
+      })
     } finally {
       setIsLoading(false)
     }
@@ -238,6 +293,29 @@ export default function AddBookPage() {
         transition={{ delay: 0.1 }}
         className="bg-white/90 backdrop-blur-md rounded-2xl p-8 shadow-lg border border-gray-200"
       >
+        {/* Message Display */}
+        <AnimatePresence>
+          {message && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className={`mb-6 p-4 rounded-lg border flex items-center gap-3 ${
+                message.type === "success"
+                  ? "bg-green-50 border-green-200 text-green-800"
+                  : "bg-red-50 border-red-200 text-red-800"
+              }`}
+            >
+              {message.type === "success" ? (
+                <CheckCircle className="h-5 w-5 flex-shrink-0" />
+              ) : (
+                <AlertCircle className="h-5 w-5 flex-shrink-0" />
+              )}
+              <p className="text-sm font-medium">{message.text}</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <Label htmlFor="title" className="text-gray-700 font-medium">

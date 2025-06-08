@@ -17,9 +17,7 @@ const nextConfig = {
       },
     ],
   },
-  experimental: {
-    serverActions: true,
-  },
+  // Remove the experimental.serverActions line since Server Actions are stable in Next.js 15
   // Security headers
   async headers() {
     return [

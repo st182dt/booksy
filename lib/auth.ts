@@ -30,14 +30,16 @@ export async function decrypt(input: string): Promise<Session | null> {
 }
 
 export async function getSession(): Promise<Session | null> {
-  const session = cookies().get("session")?.value
+  const cookieStore = await cookies()
+  const session = cookieStore.get("session")?.value
   if (!session) return null
   return await decrypt(session)
 }
 
 export async function setSession(session: Session) {
   const token = await encrypt(session)
-  cookies().set("session", token, {
+  const cookieStore = await cookies()
+  cookieStore.set("session", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
@@ -46,6 +48,7 @@ export async function setSession(session: Session) {
   })
 }
 
-export function clearSession() {
-  cookies().delete("session")
+export async function clearSession() {
+  const cookieStore = await cookies()
+  cookieStore.delete("session")
 }

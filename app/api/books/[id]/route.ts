@@ -3,17 +3,19 @@ import { getDatabase } from "@/lib/mongodb"
 import { getSession } from "@/lib/auth"
 import { ObjectId } from "mongodb"
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
+
     // Validate ObjectId format to prevent injection
-    if (!ObjectId.isValid(params.id)) {
+    if (!ObjectId.isValid(id)) {
       return NextResponse.json({ message: "Invalid book ID format" }, { status: 400 })
     }
 
     const db = await getDatabase()
     const books = db.collection("books")
 
-    const book = await books.findOne({ _id: new ObjectId(params.id) })
+    const book = await books.findOne({ _id: new ObjectId(id) })
 
     if (!book) {
       return NextResponse.json({ message: "Book not found" }, { status: 404 })
@@ -26,10 +28,12 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
+
     // Validate ObjectId format to prevent injection
-    if (!ObjectId.isValid(params.id)) {
+    if (!ObjectId.isValid(id)) {
       return NextResponse.json({ message: "Invalid book ID format" }, { status: 400 })
     }
 
@@ -43,15 +47,12 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     const books = db.collection("books")
 
     // Check if user owns the book
-    const existingBook = await books.findOne({ _id: new ObjectId(params.id) })
+    const existingBook = await books.findOne({ _id: new ObjectId(id) })
     if (!existingBook || existingBook.userId !== session.userId) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 403 })
     }
 
-    const result = await books.updateOne(
-      { _id: new ObjectId(params.id) },
-      { $set: { ...bookData, updatedAt: new Date() } },
-    )
+    const result = await books.updateOne({ _id: new ObjectId(id) }, { $set: { ...bookData, updatedAt: new Date() } })
 
     if (result.matchedCount === 0) {
       return NextResponse.json({ message: "Book not found" }, { status: 404 })
@@ -64,10 +65,12 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
+
     // Validate ObjectId format to prevent injection
-    if (!ObjectId.isValid(params.id)) {
+    if (!ObjectId.isValid(id)) {
       return NextResponse.json({ message: "Invalid book ID format" }, { status: 400 })
     }
 
@@ -80,12 +83,12 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     const books = db.collection("books")
 
     // Check if user owns the book
-    const existingBook = await books.findOne({ _id: new ObjectId(params.id) })
+    const existingBook = await books.findOne({ _id: new ObjectId(id) })
     if (!existingBook || existingBook.userId !== session.userId) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 403 })
     }
 
-    const result = await books.deleteOne({ _id: new ObjectId(params.id) })
+    const result = await books.deleteOne({ _id: new ObjectId(id) })
 
     if (result.deletedCount === 0) {
       return NextResponse.json({ message: "Book not found" }, { status: 404 })

@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { X } from "lucide-react"
+import { X, CheckCircle, AlertCircle } from "lucide-react"
 
 interface AuthModalProps {
   isOpen: boolean
@@ -18,12 +18,12 @@ interface AuthModalProps {
 export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
   const [isLogin, setIsLogin] = useState(true)
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsLoading(true)
-    setError("")
+    setMessage(null)
 
     const formData = new FormData(e.currentTarget)
     const data = {
@@ -41,13 +41,25 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
       })
 
       if (response.ok) {
-        onSuccess()
+        setMessage({
+          type: "success",
+          text: isLogin ? "Successfully logged in!" : "Account created successfully!",
+        })
+        setTimeout(() => {
+          onSuccess()
+        }, 1000)
       } else {
         const errorData = await response.json()
-        setError(errorData.message || "Something went wrong")
+        setMessage({
+          type: "error",
+          text: errorData.message || "Something went wrong",
+        })
       }
     } catch (error) {
-      setError("Network error. Please try again.")
+      setMessage({
+        type: "error",
+        text: "Network error. Please try again.",
+      })
     } finally {
       setIsLoading(false)
     }
@@ -77,11 +89,28 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
               </Button>
             </div>
 
-            {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-red-700 text-sm">{error}</p>
-              </div>
-            )}
+            {/* Message Display */}
+            <AnimatePresence>
+              {message && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className={`mb-4 p-3 rounded-lg border flex items-center gap-3 ${
+                    message.type === "success"
+                      ? "bg-green-50 border-green-200 text-green-800"
+                      : "bg-red-50 border-red-200 text-red-800"
+                  }`}
+                >
+                  {message.type === "success" ? (
+                    <CheckCircle className="h-4 w-4 flex-shrink-0" />
+                  ) : (
+                    <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                  )}
+                  <p className="text-sm font-medium">{message.text}</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               {!isLogin && (
@@ -140,7 +169,10 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
             <div className="mt-6 text-center">
               <button
                 type="button"
-                onClick={() => setIsLogin(!isLogin)}
+                onClick={() => {
+                  setIsLogin(!isLogin)
+                  setMessage(null)
+                }}
                 className="text-purple-600 hover:text-purple-700 font-medium transition-colors"
               >
                 {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}

@@ -50,27 +50,64 @@ export async function POST(request: NextRequest) {
     }
 
     const bookData = await request.json()
+    console.log("Received book data:", bookData) // Debug log
 
-    // Basic validation
-    if (!bookData.title || typeof bookData.title !== "string" || bookData.title.length > 200) {
-      return NextResponse.json({ message: "Invalid title" }, { status: 400 })
+    // Basic validation with better error messages
+    if (!bookData.title || typeof bookData.title !== "string") {
+      return NextResponse.json({ message: "Title is required and must be a string" }, { status: 400 })
+    }
+
+    if (bookData.title.length > 200) {
+      return NextResponse.json({ message: "Title must be less than 200 characters" }, { status: 400 })
     }
 
     if (!["New", "Like New", "Good", "Fair", "Poor"].includes(bookData.condition)) {
-      return NextResponse.json({ message: "Invalid condition" }, { status: 400 })
+      return NextResponse.json(
+        { message: "Invalid condition. Must be one of: New, Like New, Good, Fair, Poor" },
+        { status: 400 },
+      )
     }
 
-    if (typeof bookData.price !== "number" || bookData.price < 0 || bookData.price > 10000) {
-      return NextResponse.json({ message: "Invalid price" }, { status: 400 })
+    if (typeof bookData.price !== "number" || isNaN(bookData.price) || bookData.price < 0) {
+      return NextResponse.json({ message: "Price must be a valid positive number" }, { status: 400 })
     }
 
-    if (
-      !bookData.description ||
-      typeof bookData.description !== "string" ||
-      bookData.description.length < 10 ||
-      bookData.description.length > 1000
-    ) {
-      return NextResponse.json({ message: "Description must be between 10-1000 characters" }, { status: 400 })
+    if (bookData.price > 10000) {
+      return NextResponse.json({ message: "Price cannot exceed $10,000" }, { status: 400 })
+    }
+
+    if (!bookData.description || typeof bookData.description !== "string") {
+      return NextResponse.json({ message: "Description is required and must be a string" }, { status: 400 })
+    }
+
+    if (bookData.description.length < 10) {
+      return NextResponse.json({ message: "Description must be at least 10 characters long" }, { status: 400 })
+    }
+
+    if (bookData.description.length > 1000) {
+      return NextResponse.json({ message: "Description must be less than 1000 characters" }, { status: 400 })
+    }
+
+    if (!bookData.sellerProfile || typeof bookData.sellerProfile !== "string") {
+      return NextResponse.json({ message: "Seller profile URL is required" }, { status: 400 })
+    }
+
+    // Validate URL format
+    try {
+      new URL(bookData.sellerProfile)
+    } catch {
+      return NextResponse.json({ message: "Seller profile must be a valid URL" }, { status: 400 })
+    }
+
+    if (!bookData.imageUrl || !Array.isArray(bookData.imageUrl) || bookData.imageUrl.length === 0) {
+      return NextResponse.json({ message: "At least one image is required" }, { status: 400 })
+    }
+
+    // Validate image URLs
+    for (const imageUrl of bookData.imageUrl) {
+      if (!imageUrl || typeof imageUrl !== "string") {
+        return NextResponse.json({ message: "All image URLs must be valid strings" }, { status: 400 })
+      }
     }
 
     // Sanitize inputs
@@ -83,7 +120,7 @@ export async function POST(request: NextRequest) {
     const newBook = {
       title: sanitizedTitle,
       condition: bookData.condition,
-      price: bookData.price,
+      price: Number(bookData.price), // Ensure it's a number
       description: sanitizedDescription,
       sellerProfile: bookData.sellerProfile,
       imageUrl: bookData.imageUrl,
@@ -92,6 +129,8 @@ export async function POST(request: NextRequest) {
       dateAdded: new Date(),
       toVerify: true, // All new books need verification
     }
+
+    console.log("Creating book:", newBook) // Debug log
 
     const result = await books.insertOne(newBook)
 
@@ -104,6 +143,6 @@ export async function POST(request: NextRequest) {
     )
   } catch (error) {
     console.error("Error adding book:", error)
-    return NextResponse.json({ message: "Internal server error" }, { status: 500 })
+    return NextResponse.json({ message: `Internal server error: ${error.message}` }, { status: 500 })
   }
 }
